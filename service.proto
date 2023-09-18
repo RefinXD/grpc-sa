@@ -1,0 +1,38 @@
+package chat;
+
+syntax = "proto3";
+
+service Places {
+
+    rpc uploadPlaceInfo(Place) returns (Place) {}
+    rpc updatePlace(Place) returns (Place) {}
+    rpc getPlaceInfo(PlaceId) returns (Place) {}
+    rpc searchPlaces(PlaceName) returns (Place) {}
+    rpc filterPlaces(Filter) returns (PlaceList) {}
+    rpc removePlaces(PlaceId) returns (Empty) {}
+}
+
+message Empty{}
+
+message Place {
+    string name = 1;
+    int32 capacity = 2;
+    repeated string facilities = 3;
+}
+
+message PlaceId {
+    string id=1;
+}
+
+message PlaceList{
+    repated Place place = 1;
+}
+
+message PlaceName{
+    string name = 1;
+}
+
+message Filter{
+    optional int32 minCapacity = 1;
+    repeated string facilities = 2;
+}
