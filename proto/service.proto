@@ -1,15 +1,15 @@
-package chat;
+
 
 syntax = "proto3";
+package places;
 
-service Places {
-
+service PlaceService {
     rpc uploadPlaceInfo(Place) returns (Place) {}
-    rpc updatePlace(Place) returns (Place) {}
-    rpc getPlaceInfo(PlaceId) returns (Place) {}
-    rpc searchPlaces(PlaceName) returns (Place) {}
+    rpc updatePlace(UpdatePlace) returns (Place) {}
+    rpc getPlaceInfo(PlaceName) returns (Place) {}
+    rpc searchPlaces(PlaceName) returns (PlaceList) {}
     rpc filterPlaces(Filter) returns (PlaceList) {}
-    rpc removePlaces(PlaceId) returns (Empty) {}
+    rpc removePlaces(PlaceName) returns (Empty) {}
 }
 
 message Empty{}
@@ -20,12 +20,17 @@ message Place {
     repeated string facilities = 3;
 }
 
+message UpdatePlace{
+    string targetName = 1;
+    Place newInfo = 2;
+}
+
 message PlaceId {
     string id=1;
 }
 
 message PlaceList{
-    repated Place place = 1;
+    repeated Place place = 1;
 }
 
 message PlaceName{
