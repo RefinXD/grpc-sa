@@ -2,6 +2,7 @@
 
 syntax = "proto3";
 package places;
+option go_package="./places";
 
 service PlaceService {
     rpc uploadPlaceInfo(Place) returns (Place) {}
@@ -15,18 +16,16 @@ service PlaceService {
 message Empty{}
 
 message Place {
-    string name = 1;
-    int32 capacity = 2;
-    repeated string facilities = 3;
+    string id = 1;
+    string name = 2;
+    string owner = 3;
+    int32 capacity = 4;
+    repeated string facilities = 5;
 }
 
 message UpdatePlace{
     string targetName = 1;
     Place newInfo = 2;
-}
-
-message PlaceId {
-    string id=1;
 }
 
 message PlaceList{

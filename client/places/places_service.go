@@ -16,10 +16,10 @@ type PlacesService interface {
 
 
 type placesService struct {
-	placesClient PlacesClient
+	placesClient PlaceServiceClient
 }
 
-func NewPlaceService(placesClient PlacesClient) PlacesService {
+func NewPlaceService(placesClient PlaceServiceClient) PlacesService {
 
 	return placesService{placesClient}
 }

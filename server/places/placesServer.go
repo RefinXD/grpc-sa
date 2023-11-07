@@ -21,11 +21,11 @@ type placesServer struct {
 	con Connection
 }
 
-func NewPlacesServer(con Connection) PlacesServer{
+func NewPlacesServer(con Connection) PlaceServiceServer{
 	return placesServer{con:con}
 }
 
-func (p placesServer) mustEmbedUnimplementedPlacesServer() {}
+func (p placesServer) mustEmbedUnimplementedPlaceServiceServer() {}
 
 func (p placesServer) UploadPlaceInfo(ctx context.Context,req *Place) (*Place, error) {
 	filter := bson.D{{"name",req.Name}}
@@ -45,6 +45,7 @@ func (p placesServer) UploadPlaceInfo(ctx context.Context,req *Place) (*Place, e
 	println(placesResult)
 	res := Place {
 		Name: req.Name,
+		Owner: req.Owner,
 		Capacity: req.Capacity,
 		Facilities: req.Facilities,	
 	}
@@ -56,7 +57,9 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 	object := bson.M{
         "$set": req.NewInfo,
     }
-
+	rep := p.con.PlacesCollection.FindOne(ctx,filter)
+	var repRes Place
+	err := rep.Decode(&repRes)
 	placesResult, err := p.con.PlacesCollection.UpdateOne(ctx,filter,object)
 	if err != nil{
 		log.Fatal(err)
@@ -64,6 +67,7 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 	print(placesResult)
 	res := Place {
 		Name: req.NewInfo.Name,
+		Owner: repRes.Owner,
 		Capacity: req.NewInfo.Capacity,
 		Facilities: req.NewInfo.Facilities,
 	}
@@ -108,7 +112,7 @@ func (p placesServer) FilterPlaces(ctx context.Context,req *Filter) (*PlaceList,
 	placesResult,err := p.con.PlacesCollection.Find(ctx,filter)
 	var test PlaceList
 	placesResult.All(ctx,test.Place)
-	//println(test.Place)
+	log.Printf("1");
 	if err != nil{
 		log.Fatal(err)
 	}

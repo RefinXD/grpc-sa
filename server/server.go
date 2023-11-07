@@ -56,10 +56,7 @@ func main(){
 
 
 
-	
-
-
-	places.RegisterPlacesServer(grpcServer, places.NewPlacesServer(con))
+	places.RegisterPlaceServiceServer(grpcServer, places.NewPlacesServer(con))
 	log.Printf("Server running at 9000")
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC server over port 9000: %v",err)
