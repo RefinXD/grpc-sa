@@ -3,6 +3,7 @@ package main
 import (
 	"client/places"
 	"encoding/json"
+	//"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ var	placesService = places.NewPlaceService(placesClient)
 
 func main(){
 
-	placesService.FilterPlaces(places.Filter{Facilities:[]string{"toilet"}})
+	//placesService.FilterPlaces(places.Filter{Facilities:[]string{"toilet"}})
 
 	r := http.NewServeMux()
 	r.HandleFunc("/update", updateHandler)
@@ -47,7 +48,9 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil{
 		log.Fatal(err)
 	}
-	jsonBytes,err := json.Marshal(placesService.UpdatePlace(place));
+	log.Println(place)
+	res,err:= placesService.UpdatePlace(place);
+	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
 
@@ -60,13 +63,15 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 	if (r.Method != http.MethodGet){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
+	//log.Println(r.Body)
 	var filter places.Filter
-	respBody, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(respBody, &filter)
+	err := json.NewDecoder(r.Body).Decode(&filter)
+	log.Println(filter)
 	if err != nil{
 		log.Fatal(err)
 	}
-	jsonBytes,err := json.Marshal(placesService.FilterPlaces(filter));
+	res,err := placesService.FilterPlaces(filter);
+	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
 
@@ -85,7 +90,8 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil{
 		log.Fatal(err)
 	}
-	jsonBytes,err := json.Marshal(placesService.RemovePlaces(name));
+	res,err := placesService.RemovePlaces(name);
+	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
 
@@ -104,7 +110,8 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil{
 		log.Fatal(err)
 	}
-	jsonBytes,err := json.Marshal(placesService.SearchPlaces(name));
+	res,err:= placesService.SearchPlaces(name);
+	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
 
@@ -122,7 +129,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil{
 		log.Fatal(err)
 	}
-	jsonBytes,err := json.Marshal(placesService.UploadPlaceInfo(place));
+	res,err := placesService.UploadPlaceInfo(place);
+	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
 

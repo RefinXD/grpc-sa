@@ -7,11 +7,11 @@ import (
 
 
 type PlacesService interface {
-	UploadPlaceInfo(place Place) error
-	UpdatePlace(updatePlace UpdatePlace) error
-	SearchPlaces(name PlaceName) error 
-	FilterPlaces(filter Filter) error
-	RemovePlaces(name PlaceName) error
+	UploadPlaceInfo(place Place) (*Place, error)
+	UpdatePlace(updatePlace UpdatePlace) (*Place, error)
+	SearchPlaces(name PlaceName) (*PlaceList,error) 
+	FilterPlaces(filter Filter) (*PlaceList,error)
+	RemovePlaces(name PlaceName) (*Empty,error)
 }
 
 
@@ -24,62 +24,61 @@ func NewPlaceService(placesClient PlaceServiceClient) PlacesService {
 	return placesService{placesClient}
 }
 
-func (base placesService) UploadPlaceInfo(place Place) error {
+func (base placesService) UploadPlaceInfo(place Place) (*Place, error) {
 
 	res, err := base.placesClient.UploadPlaceInfo(context.Background(),&place)
 	if err != nil{
-		return err;
+		return nil,err;
 	}
 	fmt.Println(res)
 	fmt.Println("Service:uploadPLaceINfo")
-	return nil
+	return res,nil
 }
 
 
-func (base placesService) UpdatePlace(updatePlace UpdatePlace) error {
+func (base placesService) UpdatePlace(updatePlace UpdatePlace) (*Place,error) {
 
 	res, err := base.placesClient.UpdatePlace(context.Background(),&updatePlace)
 	if err != nil{
-		return err;
+		return nil,err;
 	}
 	fmt.Println(res)
 	fmt.Println("Service:update")
-	return nil
+	return res,nil
 }
 
 
-func (base placesService) SearchPlaces(name PlaceName) error {
+func (base placesService) SearchPlaces(name PlaceName) (*PlaceList,error) {
 
 	res, err := base.placesClient.SearchPlaces(context.Background(),&name)
 	if err != nil{
-		return err;
+		return nil,err;
 	}
 	fmt.Println(res)
 	fmt.Println("Service:SearchPlaces")
-	return nil
+	return res,nil
 }
 
 
 
-func (base placesService) FilterPlaces(filter Filter) error {
-
+func (base placesService) FilterPlaces(filter Filter) (*PlaceList,error) {
 	res, err := base.placesClient.FilterPlaces(context.Background(),&filter)
 	if err != nil{
-		return err;
+		return nil,err;
 	}
 	fmt.Println(res)
 	fmt.Println("Service:FilterPlaces")
-	return nil
+	return res,nil
 }
 
 
-func (base placesService) RemovePlaces(name PlaceName) error {
+func (base placesService) RemovePlaces(name PlaceName) (*Empty,error) {
 
 	res, err := base.placesClient.RemovePlaces(context.Background(),&name)
 	if err != nil{
-		return err;
+		return nil,err;
 	}
 	fmt.Println(res)
 	fmt.Println("Service:RemovePlaces")
-	return nil
+	return nil,nil
 }

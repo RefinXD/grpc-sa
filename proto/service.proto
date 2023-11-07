@@ -20,7 +20,8 @@ message Place {
     string name = 2;
     string owner = 3;
     int32 capacity = 4;
-    repeated string facilities = 5;
+    int32 availableSeat = 5;
+    repeated string facilities = 6;
 }
 
 message UpdatePlace{

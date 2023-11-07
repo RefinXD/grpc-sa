@@ -2,12 +2,13 @@ package places
 
 import (
 	context "context"
+	"fmt"
 
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	// "go.mongodb.org/mongo-driver/mongo/options"
 	// "go.mongodb.org/mongo-driver/mongo/readpref"
 )
@@ -42,11 +43,13 @@ func (p placesServer) UploadPlaceInfo(ctx context.Context,req *Place) (*Place, e
 		log.Fatal(err)
 	}
 	//result := req.Name
-	println(placesResult)
+	id := placesResult.InsertedID.(primitive.ObjectID)
 	res := Place {
+		Id: id.String(),
 		Name: req.Name,
 		Owner: req.Owner,
 		Capacity: req.Capacity,
+		AvailableSeat: req.Capacity,
 		Facilities: req.Facilities,	
 	}
 	return &res,nil
@@ -60,17 +63,21 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 	rep := p.con.PlacesCollection.FindOne(ctx,filter)
 	var repRes Place
 	err := rep.Decode(&repRes)
+	log.Println(repRes)
 	placesResult, err := p.con.PlacesCollection.UpdateOne(ctx,filter,object)
 	if err != nil{
 		log.Fatal(err)
 	}
-	print(placesResult)
+	print(placesResult.UpsertedID)
 	res := Place {
+		Id: req.NewInfo.Id,
 		Name: req.NewInfo.Name,
-		Owner: repRes.Owner,
+		Owner: req.NewInfo.Owner,
+		AvailableSeat: req.NewInfo.AvailableSeat,
 		Capacity: req.NewInfo.Capacity,
 		Facilities: req.NewInfo.Facilities,
 	}
+	fmt.Println(res)
 	return &res,nil
 }
 
@@ -108,11 +115,12 @@ func (p placesServer) SearchPlaces(ctx context.Context,req *PlaceName) (*PlaceLi
 }
 
 func (p placesServer) FilterPlaces(ctx context.Context,req *Filter) (*PlaceList, error) {
+	log.Println(req)
 	filter := bson.M{"facilities":bson.M{"$in" :req.Facilities} }
+	log.Println(filter)
 	placesResult,err := p.con.PlacesCollection.Find(ctx,filter)
 	var test PlaceList
 	placesResult.All(ctx,test.Place)
-	log.Printf("1");
 	if err != nil{
 		log.Fatal(err)
 	}
