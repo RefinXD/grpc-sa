@@ -35,7 +35,7 @@ func (p placesServer) UploadPlaceInfo(ctx context.Context,req *Place) (*Place, e
 	err := rep.Decode(&repRes)
 	if err == nil{
 		println("Duplicate name")
-		return nil,nil
+		return nil,err
 	}
 
 	placesResult, err := p.con.PlacesCollection.InsertOne(ctx,req)
@@ -64,13 +64,17 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 	var repRes Place
 	err := rep.Decode(&repRes)
 	log.Println(repRes)
+	if err != nil{
+		println("Place Not Found")
+		return nil,err
+	}
 	placesResult, err := p.con.PlacesCollection.UpdateOne(ctx,filter,object)
 	if err != nil{
 		log.Fatal(err)
 	}
 	print(placesResult.UpsertedID)
 	res := Place {
-		Id: req.NewInfo.Id,
+		Id: placesResult.UpsertedID.(primitive.ObjectID).String(),
 		Name: req.NewInfo.Name,
 		Owner: req.NewInfo.Owner,
 		AvailableSeat: req.NewInfo.AvailableSeat,
@@ -81,17 +85,17 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 	return &res,nil
 }
 
-func (p placesServer) GetPlaceInfo(ctx context.Context,req *PlaceName) (*Place, error) {
-	filter := bson.D{{"name",req.Name}}
-	placesResult := p.con.PlacesCollection.FindOne(ctx,filter)
-	log.Println(placesResult)
-	res := Place {
-		Name: "test",
-		Capacity: 1,
-		Facilities: []string{"yes"},
+func (p placesServer) GetPlaceInfo(ctx context.Context,req *PlaceId) (*Place, error) {
+	var place Place
+	id,err := primitive.ObjectIDFromHex(req.Id)
+	if err != nil{
+		log.Fatal(err)
 	}
+	filter := bson.M{"_id":id}
+	placesResult := p.con.PlacesCollection.FindOne(ctx,filter)
+	log.Println(placesResult.Decode(&place))
 	
-	return &res,nil
+	return &place,nil
 }
 
 func (p placesServer) SearchPlaces(ctx context.Context,req *PlaceName) (*PlaceList, error) {
@@ -115,9 +119,12 @@ func (p placesServer) SearchPlaces(ctx context.Context,req *PlaceName) (*PlaceLi
 }
 
 func (p placesServer) FilterPlaces(ctx context.Context,req *Filter) (*PlaceList, error) {
-	log.Println(req)
-	filter := bson.M{"facilities":bson.M{"$in" :req.Facilities} }
-	log.Println(filter)
+	filter := bson.M{}
+	if len(req.Facilities) == 0{
+		filter = bson.M{"availableseat":bson.M{"$gte":req.MinCapacity}}
+	} else{
+		filter = bson.M{"facilities":bson.M{"$in" :req.Facilities},"availableseat":bson.M{"$gt":req.MinCapacity}}
+	}
 	placesResult,err := p.con.PlacesCollection.Find(ctx,filter)
 	var test PlaceList
 	placesResult.All(ctx,test.Place)
@@ -141,10 +148,18 @@ func (p placesServer) FilterPlaces(ctx context.Context,req *Filter) (*PlaceList,
 
 func (p placesServer) RemovePlaces(ctx context.Context,req *PlaceName) (*Empty, error) {
 	filter := bson.D{{"name",req.Name}}
+	rep := p.con.PlacesCollection.FindOne(ctx,filter)
+	var repRes Place
+	err := rep.Decode(&repRes)
+	if err != nil{
+		println("No place found with given name")
+		return nil,err
+	}
 	placesResult, err := p.con.PlacesCollection.DeleteOne(ctx,filter)
 	if err != nil{
 		log.Fatal(err)
 	}
+	var res Empty
 	print(placesResult)
-	return nil,nil
+	return &res,nil
 }

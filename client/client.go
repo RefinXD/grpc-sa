@@ -3,6 +3,8 @@ package main
 import (
 	"client/places"
 	"encoding/json"
+	"fmt"
+
 	//"fmt"
 	"io/ioutil"
 	"log"
@@ -29,6 +31,7 @@ func main(){
 	r.HandleFunc("/filter", filterHandler)
 	r.HandleFunc("/search", searchHandler)
 	r.HandleFunc("/delete", deleteHandler)
+	r.HandleFunc("/info", getHandler)
 	server := &http.Server{
 		Addr: ":8080",
 		Handler:r,
@@ -50,6 +53,11 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println(place)
 	res,err:= placesService.UpdatePlace(place);
+	if err != nil{
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -71,6 +79,11 @@ func filterHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	res,err := placesService.FilterPlaces(filter);
+	if err != nil{
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -91,11 +104,17 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	res,err := placesService.RemovePlaces(name);
-	jsonBytes,err := json.Marshal(res);
+	if err != nil{
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	fmt.Println(res)
+	fmt.Println("deleted")
 	
 	w.Header().Set("Content-Type", "application/json")
 
-	w.Write(jsonBytes)
+	w.Write([]byte("Successfully Deleted"))
 
 }
 
@@ -111,6 +130,11 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	res,err:= placesService.SearchPlaces(name);
+	if err != nil{
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -130,6 +154,42 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	res,err := placesService.UploadPlaceInfo(place);
+	if err != nil || res == nil{
+
+		w.WriteHeader(400)
+		if res == nil{
+			w.Write([]byte("Duplicate Name"))
+		}else{
+		w.Write([]byte(err.Error()))
+		}
+		return
+	}
+	jsonBytes,err := json.Marshal(res);
+
+	
+	w.Header().Set("Content-Type", "application/json")
+
+	w.Write(jsonBytes)
+
+}
+
+func getHandler(w http.ResponseWriter, r *http.Request) {
+
+	if (r.Method != http.MethodGet){
+		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
+	}
+	var name places.PlaceId
+	respBody, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(respBody, &name)
+	if err != nil{
+		log.Fatal(err)
+	}
+	res,err:= placesService.GetPlaceInfo(name);
+	if err != nil{
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	jsonBytes,err := json.Marshal(res);
 	
 	w.Header().Set("Content-Type", "application/json")

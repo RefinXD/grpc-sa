@@ -33,7 +33,7 @@ const (
 type PlaceServiceClient interface {
 	UploadPlaceInfo(ctx context.Context, in *Place, opts ...grpc.CallOption) (*Place, error)
 	UpdatePlace(ctx context.Context, in *UpdatePlace, opts ...grpc.CallOption) (*Place, error)
-	GetPlaceInfo(ctx context.Context, in *PlaceName, opts ...grpc.CallOption) (*Place, error)
+	GetPlaceInfo(ctx context.Context, in *PlaceId, opts ...grpc.CallOption) (*Place, error)
 	SearchPlaces(ctx context.Context, in *PlaceName, opts ...grpc.CallOption) (*PlaceList, error)
 	FilterPlaces(ctx context.Context, in *Filter, opts ...grpc.CallOption) (*PlaceList, error)
 	RemovePlaces(ctx context.Context, in *PlaceName, opts ...grpc.CallOption) (*Empty, error)
@@ -65,7 +65,7 @@ func (c *placeServiceClient) UpdatePlace(ctx context.Context, in *UpdatePlace, o
 	return out, nil
 }
 
-func (c *placeServiceClient) GetPlaceInfo(ctx context.Context, in *PlaceName, opts ...grpc.CallOption) (*Place, error) {
+func (c *placeServiceClient) GetPlaceInfo(ctx context.Context, in *PlaceId, opts ...grpc.CallOption) (*Place, error) {
 	out := new(Place)
 	err := c.cc.Invoke(ctx, PlaceService_GetPlaceInfo_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *placeServiceClient) RemovePlaces(ctx context.Context, in *PlaceName, op
 type PlaceServiceServer interface {
 	UploadPlaceInfo(context.Context, *Place) (*Place, error)
 	UpdatePlace(context.Context, *UpdatePlace) (*Place, error)
-	GetPlaceInfo(context.Context, *PlaceName) (*Place, error)
+	GetPlaceInfo(context.Context, *PlaceId) (*Place, error)
 	SearchPlaces(context.Context, *PlaceName) (*PlaceList, error)
 	FilterPlaces(context.Context, *Filter) (*PlaceList, error)
 	RemovePlaces(context.Context, *PlaceName) (*Empty, error)
@@ -124,7 +124,7 @@ func (UnimplementedPlaceServiceServer) UploadPlaceInfo(context.Context, *Place) 
 func (UnimplementedPlaceServiceServer) UpdatePlace(context.Context, *UpdatePlace) (*Place, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePlace not implemented")
 }
-func (UnimplementedPlaceServiceServer) GetPlaceInfo(context.Context, *PlaceName) (*Place, error) {
+func (UnimplementedPlaceServiceServer) GetPlaceInfo(context.Context, *PlaceId) (*Place, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPlaceInfo not implemented")
 }
 func (UnimplementedPlaceServiceServer) SearchPlaces(context.Context, *PlaceName) (*PlaceList, error) {
@@ -186,7 +186,7 @@ func _PlaceService_UpdatePlace_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _PlaceService_GetPlaceInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PlaceName)
+	in := new(PlaceId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func _PlaceService_GetPlaceInfo_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: PlaceService_GetPlaceInfo_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PlaceServiceServer).GetPlaceInfo(ctx, req.(*PlaceName))
+		return srv.(PlaceServiceServer).GetPlaceInfo(ctx, req.(*PlaceId))
 	}
 	return interceptor(ctx, in, info, handler)
 }

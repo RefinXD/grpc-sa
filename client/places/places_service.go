@@ -12,6 +12,7 @@ type PlacesService interface {
 	SearchPlaces(name PlaceName) (*PlaceList,error) 
 	FilterPlaces(filter Filter) (*PlaceList,error)
 	RemovePlaces(name PlaceName) (*Empty,error)
+	GetPlaceInfo(placeId PlaceId) (*Place, error)
 }
 
 
@@ -40,6 +41,7 @@ func (base placesService) UpdatePlace(updatePlace UpdatePlace) (*Place,error) {
 
 	res, err := base.placesClient.UpdatePlace(context.Background(),&updatePlace)
 	if err != nil{
+		fmt.Println(err)
 		return nil,err;
 	}
 	fmt.Println(res)
@@ -81,4 +83,15 @@ func (base placesService) RemovePlaces(name PlaceName) (*Empty,error) {
 	fmt.Println(res)
 	fmt.Println("Service:RemovePlaces")
 	return nil,nil
+}
+
+func (base placesService) GetPlaceInfo(id PlaceId) (*Place,error) {
+
+	res, err := base.placesClient.GetPlaceInfo(context.Background(),&id)
+	if err != nil{
+		return nil,err;
+	}
+	fmt.Println(res)
+	fmt.Println("Service:GetPlaceInfo")
+	return res,nil
 }

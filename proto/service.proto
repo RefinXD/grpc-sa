@@ -1,5 +1,3 @@
-
-
 syntax = "proto3";
 package places;
 option go_package="./places";
@@ -7,7 +5,7 @@ option go_package="./places";
 service PlaceService {
     rpc uploadPlaceInfo(Place) returns (Place) {}
     rpc updatePlace(UpdatePlace) returns (Place) {}
-    rpc getPlaceInfo(PlaceName) returns (Place) {}
+    rpc getPlaceInfo(PlaceId) returns (Place) {}
     rpc searchPlaces(PlaceName) returns (PlaceList) {}
     rpc filterPlaces(Filter) returns (PlaceList) {}
     rpc removePlaces(PlaceName) returns (Empty) {}
@@ -35,6 +33,10 @@ message PlaceList{
 
 message PlaceName{
     string name = 1;
+}
+
+message PlaceId{
+    string id = 1;
 }
 
 message Filter{
