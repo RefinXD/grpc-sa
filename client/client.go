@@ -36,6 +36,7 @@ func main(){
 		Addr: ":8080",
 		Handler:r,
 	}
+	fmt.Println("Client running at 8080")
 	if err:= server.ListenAndServe();err != nil{
 		panic(err)
 	}

@@ -6,9 +6,8 @@ FROM golang:1.19
 WORKDIR /app
 
 # Download Go modules
-COPY client ./
-COPY server ./
-COPY script.sh ./
+COPY . ./
+
 
 WORKDIR /app/client
 
@@ -34,4 +33,5 @@ EXPOSE 9000
 
 
 # Run
-CMD ["./script.sh"]
+RUN ["chmod", "+x", "script.sh"]
+CMD ["sh","script.sh"]

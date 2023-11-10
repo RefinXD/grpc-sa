@@ -26,6 +26,10 @@ func NewPlacesServer(con Connection) PlaceServiceServer{
 	return placesServer{con:con}
 }
 
+type HexId struct {
+    ID primitive.ObjectID `bson:"_id"`
+}
+
 func (p placesServer) mustEmbedUnimplementedPlaceServiceServer() {}
 
 func (p placesServer) UploadPlaceInfo(ctx context.Context,req *Place) (*Place, error) {
@@ -63,18 +67,21 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 	rep := p.con.PlacesCollection.FindOne(ctx,filter)
 	var repRes Place
 	err := rep.Decode(&repRes)
-	log.Println(repRes)
+	// log.Println(repRes)
 	if err != nil{
 		println("Place Not Found")
 		return nil,err
 	}
 	placesResult, err := p.con.PlacesCollection.UpdateOne(ctx,filter,object)
 	if err != nil{
+		log.Println("what")
 		log.Fatal(err)
 	}
-	print(placesResult.UpsertedID)
+	log.Println("2")
+	log.Println(placesResult)
+	log.Println("3")
 	res := Place {
-		Id: placesResult.UpsertedID.(primitive.ObjectID).String(),
+		Id: repRes.Id,
 		Name: req.NewInfo.Name,
 		Owner: req.NewInfo.Owner,
 		AvailableSeat: req.NewInfo.AvailableSeat,
@@ -100,17 +107,23 @@ func (p placesServer) GetPlaceInfo(ctx context.Context,req *PlaceId) (*Place, er
 
 func (p placesServer) SearchPlaces(ctx context.Context,req *PlaceName) (*PlaceList, error) {
 	filter := bson.M{"name": primitive.Regex{Pattern: req.Name, Options: ""}}
-	placesResult,err := p.con.PlacesCollection.Find(ctx,filter)
+	placesResult,err := p.con.PlacesCollection.Find(ctx,filter);
 	if err != nil{
 		log.Fatal(err)
 	}
 	var res PlaceList
 	for placesResult.Next(context.TODO()) {
-		var result Place
-		if err := placesResult.Decode(&result); err != nil {
+		fmt.Println(placesResult)
+		var temp Place;
+		var id HexId;
+		if err := placesResult.Decode(&temp); err != nil {
 			log.Fatal(err)
 		}
-		res.Place = append(res.Place, &result)
+		if err := placesResult.Decode(&id); err != nil {
+			log.Fatal(err)
+		}
+		temp.Id = id.ID.Hex()
+		res.Place = append(res.Place, &temp)
 	}
 	if err := placesResult.Err(); err != nil {
 		log.Fatal(err)
