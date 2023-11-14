@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -36,16 +37,24 @@ func main(){
 	r.HandleFunc("/searchbyowner", searchByOwnerHandler)
 	r.HandleFunc("/delete", deleteHandler)
 	r.HandleFunc("/info", getHandler)
-	server := &http.Server{
-		Addr: ":8080",
-		Handler:r,
-	}
-	fmt.Println("Client running at 8080")
-	if err:= server.ListenAndServe();err != nil{
-		panic(err)
-	}
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},     // Allow any origin
+		AllowedHeaders: []string{"*"},     // Allow any headers
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		Debug:          true,              // Enable debugging (optional)
+	}).Handler(r)
+	
+
+	// Start the server on port 8080
+	fmt.Println("Server listening on :8080")
+	http.ListenAndServe(":8080", corsHandler)
+	// fmt.Println("Client running at 8080")
+	// if err:= http.ListenAndServe(":8080",corsHandler);err != nil{
+	// 	panic(err)
+	// }
 }
 func updateHandler(w http.ResponseWriter, r *http.Request) {
+
 	if (r.Method != http.MethodPatch){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
@@ -192,14 +201,24 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if (r.Method != http.MethodPost){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
+	req := r.Header
+	// test := r.Body
+	// fmt.Println("Header",req)
+	// fmt.Println("Body",test)
+	fmt.Println("Keys:")
+    for key := range req {
+        fmt.Println(key)
+    }
 	reqToken := strings.Split(r.Header.Get("Authorization"), " ")[1]
 	fmt.Println(reqToken)
 	var place places.Place
+	fmt.Println(1)
 	respBody, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(respBody, &place)
 	if err != nil{
 		log.Fatal(err)
 	}
+	fmt.Println(3)
 	res,err := placesService.UploadPlaceInfo(place,reqToken);
 	fmt.Println(res,err)
 	if err != nil || res == nil{
