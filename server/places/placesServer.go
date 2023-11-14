@@ -48,7 +48,7 @@ func (p placesServer) UploadPlaceInfo(ctx context.Context,req *Place) (*Place, e
 	token := "Bearer " + strings.Split(md.Get("authorization")[0], " ")[1]
 	fmt.Println(token)
 
-	newReq, err := http.NewRequest("GET", "http://localhost:8081/verifyuserdetail", nil)
+	newReq, err := http.NewRequest("GET", "http://user-service:8081/verifyuserdetail", nil)
 	newReq.Header.Add("Authorization", token)
 	client := &http.Client{}
     resp, err := client.Do(newReq)
@@ -109,7 +109,7 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 	fmt.Println(md)
 	token := "Bearer " + strings.Split(md.Get("authorization")[0], " ")[1]
 	fmt.Println(token)
-	newReq, err := http.NewRequest("GET", "http://localhost:8081/verifyuserdetail", nil)
+	newReq, err := http.NewRequest("GET", "http://user-service:8081/verifyuserdetail", nil)
 	newReq.Header.Add("Authorization", token)
 	client := &http.Client{}
 	fmt.Println(1)
@@ -308,7 +308,7 @@ func (p placesServer) RemovePlaces(ctx context.Context,req *PlaceName) (*Empty, 
 	md,_ := metadata.FromIncomingContext(ctx)
 	token := "Bearer " + strings.Split(md.Get("authorization")[0], " ")[1]
 	//fmt.Println(token)
-	newReq, err := http.NewRequest("GET", "http://localhost:8081/verifyuserdetail", nil)
+	newReq, err := http.NewRequest("GET", "http://user-service:8081/verifyuserdetail", nil)
 	newReq.Header.Add("Authorization", token)
 	client := &http.Client{}
 	fmt.Println(1)

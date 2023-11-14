@@ -40,7 +40,7 @@ func main(){
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},     // Allow any origin
 		AllowedHeaders: []string{"*"},     // Allow any headers
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedMethods: []string{"GET", "POST","PATCH", "PUT", "DELETE"},
 		Debug:          true,              // Enable debugging (optional)
 	}).Handler(r)
 	
@@ -79,7 +79,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 func filterHandler(w http.ResponseWriter, r *http.Request) {
 
-	if (r.Method != http.MethodGet){
+	if (r.Method != http.MethodPost){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
 	//log.Println(r.Body)
@@ -131,12 +131,14 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("tests",r.URL.Query())
 	if (r.Method != http.MethodGet){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
 	var name places.PlaceName
 	respBody, _ := ioutil.ReadAll(r.Body)
 	fmt.Println(respBody)
+	name.Name= r.URL.Query().Get("name")
 	if (len(respBody) == 0){
 		respBody= []byte{123, 10, 9, 34, 110, 97, 109, 101, 34, 58, 34, 34, 10, 125, 10}
 	}
@@ -173,6 +175,7 @@ func searchByOwnerHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil{
 		log.Fatal(err)
 	}
+	name.OwnerName = r.URL.Query().Get("ownerName")
 	res,err:= placesService.SearchPlacesByOwner(name);
 	fmt.Println("success")
 	if err != nil{
