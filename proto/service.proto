@@ -9,6 +9,7 @@ service PlaceService {
     rpc searchPlaces(PlaceName) returns (PlaceList) {}
     rpc filterPlaces(Filter) returns (PlaceList) {}
     rpc removePlaces(PlaceName) returns (Empty) {}
+    rpc searchPlacesByOwner(OwnerName) returns (PlaceList) {}
 }
 
 message Empty{}
@@ -33,6 +34,9 @@ message PlaceList{
 
 message PlaceName{
     string name = 1;
+}
+message OwnerName{
+    string ownerName = 1;
 }
 
 message PlaceId{

@@ -3,16 +3,19 @@ package places
 import (
 	"context"
 	"fmt"
+
+	"google.golang.org/grpc/metadata"
 )
 
 
 type PlacesService interface {
-	UploadPlaceInfo(place Place) (*Place, error)
-	UpdatePlace(updatePlace UpdatePlace) (*Place, error)
+	UploadPlaceInfo(place Place,token string) (*Place, error)
+	UpdatePlace(updatePlace UpdatePlace,token string) (*Place, error)
 	SearchPlaces(name PlaceName) (*PlaceList,error) 
 	FilterPlaces(filter Filter) (*PlaceList,error)
 	RemovePlaces(name PlaceName) (*Empty,error)
 	GetPlaceInfo(placeId PlaceId) (*Place, error)
+	SearchPlacesByOwner(name OwnerName) (*PlaceList,error)
 }
 
 
@@ -25,9 +28,9 @@ func NewPlaceService(placesClient PlaceServiceClient) PlacesService {
 	return placesService{placesClient}
 }
 
-func (base placesService) UploadPlaceInfo(place Place) (*Place, error) {
-
-	res, err := base.placesClient.UploadPlaceInfo(context.Background(),&place)
+func (base placesService) UploadPlaceInfo(place Place,token string) (*Place, error) {
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer ")
+	res, err := base.placesClient.UploadPlaceInfo(ctx,&place)
 	if err != nil{
 		return nil,err;
 	}
@@ -37,9 +40,10 @@ func (base placesService) UploadPlaceInfo(place Place) (*Place, error) {
 }
 
 
-func (base placesService) UpdatePlace(updatePlace UpdatePlace) (*Place,error) {
+func (base placesService) UpdatePlace(updatePlace UpdatePlace,token string) (*Place,error) {
 
-	res, err := base.placesClient.UpdatePlace(context.Background(),&updatePlace)
+	ctx := metadata.AppendToOutgoingContext(context.Background(),"authorization", "Bearer "+token)
+	res, err := base.placesClient.UpdatePlace(ctx,&updatePlace)
 	if err != nil{
 		fmt.Println(err)
 		return nil,err;
@@ -53,6 +57,18 @@ func (base placesService) UpdatePlace(updatePlace UpdatePlace) (*Place,error) {
 func (base placesService) SearchPlaces(name PlaceName) (*PlaceList,error) {
 
 	res, err := base.placesClient.SearchPlaces(context.Background(),&name)
+	if err != nil{
+		return nil,err;
+	}
+	fmt.Println(res)
+	fmt.Println("Service:SearchPlaces")
+	return res,nil
+}
+
+
+func (base placesService) SearchPlacesByOwner(name OwnerName) (*PlaceList,error) {
+
+	res, err := base.placesClient.SearchPlacesByOwner(context.Background(),&name)
 	if err != nil{
 		return nil,err;
 	}

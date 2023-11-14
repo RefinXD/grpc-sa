@@ -19,12 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PlaceService_UploadPlaceInfo_FullMethodName = "/places.PlaceService/uploadPlaceInfo"
-	PlaceService_UpdatePlace_FullMethodName     = "/places.PlaceService/updatePlace"
-	PlaceService_GetPlaceInfo_FullMethodName    = "/places.PlaceService/getPlaceInfo"
-	PlaceService_SearchPlaces_FullMethodName    = "/places.PlaceService/searchPlaces"
-	PlaceService_FilterPlaces_FullMethodName    = "/places.PlaceService/filterPlaces"
-	PlaceService_RemovePlaces_FullMethodName    = "/places.PlaceService/removePlaces"
+	PlaceService_UploadPlaceInfo_FullMethodName     = "/places.PlaceService/uploadPlaceInfo"
+	PlaceService_UpdatePlace_FullMethodName         = "/places.PlaceService/updatePlace"
+	PlaceService_GetPlaceInfo_FullMethodName        = "/places.PlaceService/getPlaceInfo"
+	PlaceService_SearchPlaces_FullMethodName        = "/places.PlaceService/searchPlaces"
+	PlaceService_FilterPlaces_FullMethodName        = "/places.PlaceService/filterPlaces"
+	PlaceService_RemovePlaces_FullMethodName        = "/places.PlaceService/removePlaces"
+	PlaceService_SearchPlacesByOwner_FullMethodName = "/places.PlaceService/searchPlacesByOwner"
 )
 
 // PlaceServiceClient is the client API for PlaceService service.
@@ -37,6 +38,7 @@ type PlaceServiceClient interface {
 	SearchPlaces(ctx context.Context, in *PlaceName, opts ...grpc.CallOption) (*PlaceList, error)
 	FilterPlaces(ctx context.Context, in *Filter, opts ...grpc.CallOption) (*PlaceList, error)
 	RemovePlaces(ctx context.Context, in *PlaceName, opts ...grpc.CallOption) (*Empty, error)
+	SearchPlacesByOwner(ctx context.Context, in *OwnerName, opts ...grpc.CallOption) (*PlaceList, error)
 }
 
 type placeServiceClient struct {
@@ -101,6 +103,15 @@ func (c *placeServiceClient) RemovePlaces(ctx context.Context, in *PlaceName, op
 	return out, nil
 }
 
+func (c *placeServiceClient) SearchPlacesByOwner(ctx context.Context, in *OwnerName, opts ...grpc.CallOption) (*PlaceList, error) {
+	out := new(PlaceList)
+	err := c.cc.Invoke(ctx, PlaceService_SearchPlacesByOwner_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PlaceServiceServer is the server API for PlaceService service.
 // All implementations must embed UnimplementedPlaceServiceServer
 // for forward compatibility
@@ -111,6 +122,7 @@ type PlaceServiceServer interface {
 	SearchPlaces(context.Context, *PlaceName) (*PlaceList, error)
 	FilterPlaces(context.Context, *Filter) (*PlaceList, error)
 	RemovePlaces(context.Context, *PlaceName) (*Empty, error)
+	SearchPlacesByOwner(context.Context, *OwnerName) (*PlaceList, error)
 	mustEmbedUnimplementedPlaceServiceServer()
 }
 
@@ -135,6 +147,9 @@ func (UnimplementedPlaceServiceServer) FilterPlaces(context.Context, *Filter) (*
 }
 func (UnimplementedPlaceServiceServer) RemovePlaces(context.Context, *PlaceName) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemovePlaces not implemented")
+}
+func (UnimplementedPlaceServiceServer) SearchPlacesByOwner(context.Context, *OwnerName) (*PlaceList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchPlacesByOwner not implemented")
 }
 func (UnimplementedPlaceServiceServer) mustEmbedUnimplementedPlaceServiceServer() {}
 
@@ -257,6 +272,24 @@ func _PlaceService_RemovePlaces_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PlaceService_SearchPlacesByOwner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(OwnerName)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PlaceServiceServer).SearchPlacesByOwner(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PlaceService_SearchPlacesByOwner_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PlaceServiceServer).SearchPlacesByOwner(ctx, req.(*OwnerName))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PlaceService_ServiceDesc is the grpc.ServiceDesc for PlaceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -287,6 +320,10 @@ var PlaceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "removePlaces",
 			Handler:    _PlaceService_RemovePlaces_Handler,
+		},
+		{
+			MethodName: "searchPlacesByOwner",
+			Handler:    _PlaceService_SearchPlacesByOwner_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

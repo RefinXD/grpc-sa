@@ -2,6 +2,9 @@ package main
 
 import (
 	"client/places"
+	"strings"
+
+	//"context"
 	"encoding/json"
 	"fmt"
 
@@ -30,6 +33,7 @@ func main(){
 	r.HandleFunc("/upload", uploadHandler)
 	r.HandleFunc("/filter", filterHandler)
 	r.HandleFunc("/search", searchHandler)
+	r.HandleFunc("/searchbyowner", searchByOwnerHandler)
 	r.HandleFunc("/delete", deleteHandler)
 	r.HandleFunc("/info", getHandler)
 	server := &http.Server{
@@ -45,6 +49,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	if (r.Method != http.MethodPatch){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
+	reqToken := strings.Split(r.Header.Get("Authorization"), " ")[1]
 	var place places.UpdatePlace
 
 	respBody, _ := ioutil.ReadAll(r.Body)
@@ -53,7 +58,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	log.Println(place)
-	res,err:= placesService.UpdatePlace(place);
+	res,err:= placesService.UpdatePlace(place,reqToken);
 	if err != nil{
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
@@ -120,17 +125,21 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
-
 	if (r.Method != http.MethodGet){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
 	var name places.PlaceName
 	respBody, _ := ioutil.ReadAll(r.Body)
+	fmt.Println(respBody)
+	if (len(respBody) == 0){
+		respBody= []byte{123, 10, 9, 34, 110, 97, 109, 101, 34, 58, 34, 34, 10, 125, 10}
+	}
 	err := json.Unmarshal(respBody, &name)
 	if err != nil{
 		log.Fatal(err)
 	}
 	res,err:= placesService.SearchPlaces(name);
+	fmt.Println("success")
 	if err != nil{
 		w.WriteHeader(400)
 		w.Write([]byte(err.Error()))
@@ -143,23 +152,59 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonBytes)
 
 }
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
+func searchByOwnerHandler(w http.ResponseWriter, r *http.Request) {
+	if (r.Method != http.MethodGet){
+		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
+	}
+	var name places.OwnerName
+	respBody, _ := ioutil.ReadAll(r.Body)
+	fmt.Println(respBody)
+	if (len(respBody) == 0){
+		respBody= []byte{123, 10, 9, 34, 110, 97, 109, 101, 34, 58, 34, 34, 10, 125, 10}
+	}
+	err := json.Unmarshal(respBody, &name)
+	if err != nil{
+		log.Fatal(err)
+	}
+	res,err:= placesService.SearchPlacesByOwner(name);
+	fmt.Println("success")
+	if err != nil{
+		w.WriteHeader(400)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	jsonBytes,err := json.Marshal(res);
+	
+	w.Header().Set("Content-Type", "application/json")
+
+	w.Write(jsonBytes)
+
+}
+
+
+
+
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	
 	if (r.Method != http.MethodPost){
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
+	reqToken := strings.Split(r.Header.Get("Authorization"), " ")[1]
 	var place places.Place
 	respBody, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(respBody, &place)
 	if err != nil{
 		log.Fatal(err)
 	}
-	res,err := placesService.UploadPlaceInfo(place);
+	res,err := placesService.UploadPlaceInfo(place,reqToken);
+	fmt.Println(res,err)
 	if err != nil || res == nil{
 
 		w.WriteHeader(400)
 		if res == nil{
-			w.Write([]byte("Duplicate Name"))
+			w.Write([]byte(err.Error()))
 		}else{
 		w.Write([]byte(err.Error()))
 		}
