@@ -192,6 +192,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
 	reqToken := strings.Split(r.Header.Get("Authorization"), " ")[1]
+	fmt.Println(reqToken)
 	var place places.Place
 	respBody, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(respBody, &place)

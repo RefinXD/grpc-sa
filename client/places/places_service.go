@@ -29,7 +29,7 @@ func NewPlaceService(placesClient PlaceServiceClient) PlacesService {
 }
 
 func (base placesService) UploadPlaceInfo(place Place,token string) (*Place, error) {
-	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer ")
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
 	res, err := base.placesClient.UploadPlaceInfo(ctx,&place)
 	if err != nil{
 		return nil,err;
