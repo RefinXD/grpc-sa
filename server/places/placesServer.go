@@ -275,10 +275,11 @@ func (p placesServer) SearchPlacesByOwner(ctx context.Context, req *OwnerName) (
 func (p placesServer) FilterPlaces(ctx context.Context,req *Filter) (*PlaceList, error) {
 	filter := bson.M{}
 	if len(req.Facilities) == 0{
-		filter = bson.M{"AvailableSeat":bson.M{"$gte":req.MinCapacity}}
+		filter = bson.M{"availableseat":bson.M{"$gte":req.MinCapacity}}
 	} else{
-		filter = bson.M{"Facilities":bson.M{"$in" :req.Facilities},"AvailableSeat":bson.M{"$gte":req.MinCapacity}}
+		filter = bson.M{"facilities":bson.M{"$in" :req.Facilities},"availableseat":bson.M{"$gte":req.MinCapacity}}
 	}
+	fmt.Println(filter)
 	placesResult,err := p.con.PlacesCollection.Find(ctx,filter)
 	var test PlaceList
 	placesResult.All(ctx,test.Place)

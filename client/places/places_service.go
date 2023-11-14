@@ -13,7 +13,7 @@ type PlacesService interface {
 	UpdatePlace(updatePlace UpdatePlace,token string) (*Place, error)
 	SearchPlaces(name PlaceName) (*PlaceList,error) 
 	FilterPlaces(filter Filter) (*PlaceList,error)
-	RemovePlaces(name PlaceName) (*Empty,error)
+	RemovePlaces(name PlaceName,token string) (*Empty,error)
 	GetPlaceInfo(placeId PlaceId) (*Place, error)
 	SearchPlacesByOwner(name OwnerName) (*PlaceList,error)
 }
@@ -90,9 +90,10 @@ func (base placesService) FilterPlaces(filter Filter) (*PlaceList,error) {
 }
 
 
-func (base placesService) RemovePlaces(name PlaceName) (*Empty,error) {
+func (base placesService) RemovePlaces(name PlaceName,token string) (*Empty,error) {
+	ctx := metadata.AppendToOutgoingContext(context.Background(), "authorization", "Bearer "+token)
 
-	res, err := base.placesClient.RemovePlaces(context.Background(),&name)
+	res, err := base.placesClient.RemovePlaces(ctx,&name)
 	if err != nil{
 		return nil,err;
 	}
