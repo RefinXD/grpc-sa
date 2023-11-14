@@ -48,10 +48,6 @@ func main(){
 	// Start the server on port 8080
 	fmt.Println("Server listening on :8080")
 	http.ListenAndServe(":8080", corsHandler)
-	// fmt.Println("Client running at 8080")
-	// if err:= http.ListenAndServe(":8080",corsHandler);err != nil{
-	// 	panic(err)
-	// }
 }
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -202,9 +198,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w,"Method not allowed",http.StatusMethodNotAllowed)
 	}
 	req := r.Header
-	// test := r.Body
-	// fmt.Println("Header",req)
-	// fmt.Println("Body",test)
+
 	fmt.Println("Keys:")
     for key := range req {
         fmt.Println(key)
