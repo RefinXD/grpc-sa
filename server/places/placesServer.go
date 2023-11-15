@@ -106,10 +106,9 @@ func (p placesServer) UpdatePlace(ctx context.Context,req *UpdatePlace) (*Place,
 
 	//Verify user role
 	md,_ := metadata.FromIncomingContext(ctx)
-	fmt.Println(md)
 	token := "Bearer " + strings.Split(md.Get("authorization")[0], " ")[1]
 	fmt.Println(token)
-	newReq, err := http.NewRequest("GET", "http://user-service:8081/verifyuserdetail", nil)
+	newReq, err := http.NewRequest("GET", "http://localhost:8081/verifyuserdetail", nil)
 	newReq.Header.Add("Authorization", token)
 	client := &http.Client{}
 	fmt.Println(1)

@@ -115,6 +115,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	reqToken := strings.Split(r.Header.Get("Authorization"), " ")[1]
+	name.Name = r.URL.Query().Get("name")
 	res,err := placesService.RemovePlaces(name,reqToken);
 	if err != nil{
 		w.WriteHeader(400)
